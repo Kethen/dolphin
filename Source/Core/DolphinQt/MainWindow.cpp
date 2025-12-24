@@ -185,6 +185,12 @@ static WindowSystemType GetWindowSystemType()
   return WindowSystemType::Headless;
 }
 
+static void get_window_size_from_qt(void *arg, int *width, int *height){
+  QWindow* window = static_cast<QWindow*>(arg);
+  width[0] = window->width();
+  height[0] = window->height();
+}
+
 static WindowSystemInfo GetWindowSystemInfo(QWindow* window)
 {
   WindowSystemInfo wsi;
@@ -197,11 +203,14 @@ static WindowSystemInfo GetWindowSystemInfo(QWindow* window)
 #else
   QPlatformNativeInterface* pni = QGuiApplication::platformNativeInterface();
   wsi.display_connection = pni->nativeResourceForWindow("display", window);
-  if (wsi.type == WindowSystemType::Wayland)
-    wsi.render_window = window ? pni->nativeResourceForWindow("surface", window) : nullptr;
-  else
+  wsi.get_window_size = get_window_size_from_qt;
+  wsi.get_window_size_arg = static_cast<void*>(window);
+  if (wsi.type == WindowSystemType::Wayland) {
+    wsi.render_surface = pni->nativeResourceForWindow("surface", window);
+  } else {
     wsi.render_window = window ? reinterpret_cast<void*>(window->winId()) : nullptr;
-  wsi.render_surface = wsi.render_window;
+    wsi.render_surface = wsi.render_window;
+  }
 #endif
   wsi.render_surface_scale = window ? static_cast<float>(window->devicePixelRatio()) : 1.0f;
 

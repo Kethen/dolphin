@@ -300,10 +300,13 @@ if(ENABLE_EGL AND EGL_FOUND)
     target_sources(common PRIVATE
       GL/GLInterface/EGLX11.cpp
       GL/GLInterface/EGLX11.h
+      GL/GLInterface/EGLWayland.cpp
+      GL/GLInterface/EGLWayland.h
     )
   endif()
   target_include_directories(common PRIVATE ${EGL_INCLUDE_DIRS})
   target_link_libraries(common PUBLIC ${EGL_LIBRARIES})
+  target_link_libraries(common PUBLIC wayland-egl wayland-client wayland-server)
 endif()
 
 if(WIN32)

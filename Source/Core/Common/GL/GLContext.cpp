@@ -21,6 +21,7 @@
 #include "Common/GL/GLInterface/EGL.h"
 #if HAVE_X11
 #include "Common/GL/GLInterface/EGLX11.h"
+#include "Common/GL/GLInterface/EGLWayland.h"
 #endif
 #if defined(ANDROID)
 #include "Common/GL/GLInterface/EGLAndroid.h"
@@ -110,6 +111,12 @@ std::unique_ptr<GLContext> GLContext::Create(const WindowSystemInfo& wsi, bool s
       context = std::make_unique<GLContextGLX>();
 #else
     context = std::make_unique<GLContextGLX>();
+#endif
+  }
+  if (wsi.type == WindowSystemType::Wayland)
+  {
+#if defined(HAVE_EGL)
+    context = std::make_unique<GLContextEGLWayland>();
 #endif
   }
 #endif

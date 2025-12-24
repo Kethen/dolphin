@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
   const char* current_qt_platform = getenv("QT_QPA_PLATFORM");
   const bool replace_qt_platform = current_qt_platform != nullptr &&
                                    Common::CaseInsensitiveContains(current_qt_platform, "wayland");
-  setenv("QT_QPA_PLATFORM", "xcb", replace_qt_platform);
+  //setenv("QT_QPA_PLATFORM", "xcb", replace_qt_platform);
 #endif
 
   QCoreApplication::setOrganizationName(QStringLiteral("Dolphin Emulator"));

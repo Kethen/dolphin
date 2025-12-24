@@ -19,9 +19,11 @@ struct WindowSystemInfo
 {
   WindowSystemInfo() = default;
   WindowSystemInfo(WindowSystemType type_, void* display_connection_, void* render_window_,
-                   void* render_surface_)
+                   void* render_surface_, void (*get_window_size_)(void *, int *, int *),
+                   void* get_window_size_arg_)
       : type(type_), display_connection(display_connection_), render_window(render_window_),
-        render_surface(render_surface_)
+        render_surface(render_surface_), get_window_size(get_window_size_),
+        get_window_size_arg(get_window_size_arg_)
   {
   }
 
@@ -43,4 +45,8 @@ struct WindowSystemInfo
 
   // Scale of the render surface. For hidpi systems, this will be >1.
   float render_surface_scale = 1.0f;
+
+  // When it's not possible to evaluate this with given items
+  void (*get_window_size)(void* arg, int* width, int* height) = nullptr;
+  void *get_window_size_arg = nullptr;
 };
