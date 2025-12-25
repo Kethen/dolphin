@@ -20,6 +20,7 @@
 
 #if defined(VK_USE_PLATFORM_XLIB_KHR)
 #include <X11/Xlib.h>
+#include <vulkan/vulkan_wayland.h>
 #endif
 
 namespace Vulkan
@@ -78,6 +79,27 @@ VkSurfaceKHR SwapChain::CreateVulkanSurface(VkInstance instance, const WindowSys
     if (res != VK_SUCCESS)
     {
       LOG_VULKAN_ERROR(res, "vkCreateXlibSurfaceKHR failed: ");
+      return VK_NULL_HANDLE;
+    }
+
+    return surface;
+  }
+
+  if (wsi.type == WindowSystemType::Wayland)
+  {
+    VkWaylandSurfaceCreateInfoKHR surface_create_info = {
+      VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
+      nullptr,
+      0,
+      static_cast<wl_display*>(wsi.display_connection),
+      static_cast<wl_surface*>(wsi.render_surface)
+    };
+
+    VkSurfaceKHR surface;
+    VkResult res = vkCreateWaylandSurfaceKHR(instance, &surface_create_info, nullptr, &surface);
+    if (res != VK_SUCCESS)
+    {
+      LOG_VULKAN_ERROR(res, "vkCreateWaylandSurfaceKHR failed: ");
       return VK_NULL_HANDLE;
     }
 
@@ -300,8 +322,19 @@ bool SwapChain::CreateSwapChain()
   VkExtent2D size = surface_capabilities.currentExtent;
   if (size.width == UINT32_MAX)
   {
-    size.width = std::max(g_presenter->GetBackbufferWidth(), 1);
-    size.height = std::max(g_presenter->GetBackbufferHeight(), 1);
+    if (m_wsi.get_window_size != NULL)
+    {
+      int width, height = 0;
+      m_wsi.get_window_size(m_wsi.get_window_size_arg, &width, &height);
+      size.width = width;
+      size.height = height;
+    }
+    else
+    {
+      // this segfaults with DolphinQt code path, g_presenter is not made yet
+      size.width = std::max(g_presenter->GetBackbufferWidth(), 1);
+      size.height = std::max(g_presenter->GetBackbufferHeight(), 1);
+    }
   }
   size.width = std::clamp(size.width, surface_capabilities.minImageExtent.width,
                           surface_capabilities.maxImageExtent.width);

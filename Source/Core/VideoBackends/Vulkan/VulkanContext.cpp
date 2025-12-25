@@ -14,6 +14,8 @@
 #include "VideoCommon/DriverDetails.h"
 #include "VideoCommon/VideoCommon.h"
 
+#include <vulkan/vulkan_wayland.h>
+
 namespace Vulkan
 {
 static constexpr const char* VALIDATION_LAYER_NAME = "VK_LAYER_KHRONOS_validation";
@@ -357,6 +359,10 @@ bool VulkanContext::SelectInstanceExtensions(std::vector<const char*>* extension
 #endif
 #if defined(VK_USE_PLATFORM_XLIB_KHR)
   if (wstype == WindowSystemType::X11 && !AddExtension(VK_KHR_XLIB_SURFACE_EXTENSION_NAME, true))
+  {
+    return false;
+  }
+  if (wstype == WindowSystemType::Wayland && !AddExtension(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME, true))
   {
     return false;
   }

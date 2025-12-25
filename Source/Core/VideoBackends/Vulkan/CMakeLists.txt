@@ -41,6 +41,7 @@ target_link_libraries(videovulkan
 PUBLIC
   common
   videocommon
+  vulkan
 
 PRIVATE
   xxhash::xxhash
